@@ -317,7 +317,9 @@
         const inlineBtn = inlineWrapper.querySelector('.q-btn-inline-provador');
 
         const buyBtnSelectors = [
-            'button.atc-btn', 'button.add-to-cart-button',
+            // Rivello main form button (NÃO usar .atc-btn pois está no sticky-bar do rodapé)
+            'add-to-cart-component button.add-to-cart-button',
+            'button.add-to-cart-button',
             'button[name="add"]', 'button.product-form__submit',
             '.btn-add-to-cart', '[data-action="add-to-cart"]',
             'button[data-btn-addtocart]', '.product-form button[type="submit"]',
