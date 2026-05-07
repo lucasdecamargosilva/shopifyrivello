@@ -940,31 +940,47 @@
             var section = document.getElementById('q-related-products');
             if (!grid || !section) return;
 
-            var items = document.querySelectorAll('.js-swiper-related .js-item-product');
-            if (!items.length) items = document.querySelectorAll('.js-item-product');
+            // Shopify Rivello: cards têm .product-card com .product-card__link → /products/handle
+            // Fallback: qualquer link /products/ não-atual + img + título próximos
+            var items = document.querySelectorAll('.product-card');
+            var currentPath = window.location.pathname;
             var products = [];
+            var seen = {};
 
             items.forEach(function(item) {
-                if (products.length >= 3) return;
-                var container = item.querySelector('[data-variants]');
-                if (!container) return;
-                try {
-                    var variants = JSON.parse(container.getAttribute('data-variants'));
-                    if (!variants || !variants.length) return;
-                    var v = variants[0];
-                    var imgRaw = v.image_url || '';
-                    var img = imgRaw ? 'https:' + imgRaw.replace(/\\/g, '').replace('-1024-1024.webp', '-480-0.webp') : '';
-                    var price = v.price_short || '';
-                    // Name from img alt (Nuvemshop sets it reliably)
-                    var imgEl = item.querySelector('img[alt]');
-                    var name = imgEl ? imgEl.getAttribute('alt').trim() : '';
-                    // Link from any anchor pointing to /produtos/
-                    var linkEl = item.querySelector('a[href*="/produtos/"]');
-                    var link = linkEl ? linkEl.getAttribute('href') : '';
-                    if (img && (name || price)) {
-                        products.push({ name: name, img: img, price: price, link: link });
-                    }
-                } catch(e) {}
+                if (products.length >= 4) return;
+                var linkEl = item.querySelector('.product-card__link, a[href*="/products/"]');
+                if (!linkEl) return;
+                var link = linkEl.getAttribute('href') || '';
+                if (!link.includes('/products/')) return;
+                var basePath = link.split('?')[0];
+                if (basePath === currentPath || seen[basePath]) return;
+                seen[basePath] = 1;
+                var imgEl = item.querySelector('img');
+                if (!imgEl) return;
+                var img = imgEl.getAttribute('data-src') || imgEl.getAttribute('src') || '';
+                if (!img) return;
+                if (img.startsWith('//')) img = 'https:' + img;
+                // Título: tenta product-title, depois alt da img, depois visually-hidden
+                var name = '';
+                var titleEl = item.querySelector('.product-title, .product-card__title');
+                if (titleEl) name = titleEl.textContent.trim();
+                if (!name) {
+                    var hidden = item.querySelector('.visually-hidden');
+                    if (hidden) name = hidden.textContent.trim();
+                }
+                if (!name && imgEl.alt) name = imgEl.alt.trim();
+                // Preço: pega só "R$ X,XX"
+                var priceText = '';
+                var priceEl = item.querySelector('.price, [class*="price"]:not(.compare-at-price)');
+                if (priceEl) {
+                    var raw = priceEl.textContent.replace(/\s+/g, ' ').trim();
+                    var m = raw.match(/R\$\s*[\d.]+,\d{2}/);
+                    if (m) priceText = m[0];
+                }
+                if (img && name) {
+                    products.push({ name: name, img: img, price: priceText, link: link });
+                }
             });
 
             if (!products.length) return;
@@ -984,6 +1000,14 @@
                 nameEl.textContent = p.name;
                 a.appendChild(img);
                 a.appendChild(nameEl);
+                if (p.price) {
+                    var priceEl = document.createElement('span');
+                    priceEl.className = 'q-related-card-name';
+                    priceEl.style.color = 'var(--c-brand,var(--c-ink))';
+                    priceEl.style.fontWeight = '700';
+                    priceEl.textContent = p.price;
+                    a.appendChild(priceEl);
+                }
                 grid.appendChild(a);
             });
             section.style.display = 'block';
