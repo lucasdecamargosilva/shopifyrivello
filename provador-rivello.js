@@ -317,6 +317,7 @@
         const inlineBtn = inlineWrapper.querySelector('.q-btn-inline-provador');
 
         const buyBtnSelectors = [
+            'button.atc-btn', 'button.add-to-cart-button',
             'button[name="add"]', 'button.product-form__submit',
             '.btn-add-to-cart', '[data-action="add-to-cart"]',
             'button[data-btn-addtocart]', '.product-form button[type="submit"]',
@@ -324,20 +325,30 @@
             '#AddToCart', '.add-to-cart', '.shopify-payment-button',
             '.product-form__buttons', '.product-form__cart-submit',
         ];
-        let inlinePlaced = false;
-        for (const sel of buyBtnSelectors) {
-            const buyEl = document.querySelector(sel);
-            if (buyEl) {
-                const target = buyEl.closest('.product-form__buttons') || buyEl.parentElement;
-                target.insertBefore(inlineWrapper, target.firstChild);
-                inlinePlaced = true;
-                break;
+        function tryPlaceInline() {
+            if (document.querySelector('.q-btn-inline-provador')) return true;
+            for (const sel of buyBtnSelectors) {
+                const buyEl = document.querySelector(sel);
+                if (buyEl) {
+                    const target = buyEl.closest('.product-form-buttons, .product-form__buttons, .buy-buttons-block, .product-form') || buyEl.parentElement;
+                    target.insertBefore(inlineWrapper, target.firstChild);
+                    return true;
+                }
             }
+            const anySubmit = document.querySelector('form[action*="cart"] button[type="submit"], form button[type="submit"]');
+            if (anySubmit) {
+                anySubmit.parentElement.insertBefore(inlineWrapper, anySubmit);
+                return true;
+            }
+            return false;
         }
-        if (!inlinePlaced) {
-            // Fallback: coloca antes do primeiro form submit encontrado
-            const anySubmit = document.querySelector('form button[type="submit"]');
-            if (anySubmit) anySubmit.parentElement.insertBefore(inlineWrapper, anySubmit);
+        if (!tryPlaceInline()) {
+            // Botão de comprar pode ser injetado pelo tema depois — tenta de novo a cada 500ms por 6s
+            let _tries = 0;
+            const _iv = setInterval(() => {
+                _tries++;
+                if (tryPlaceInline() || _tries >= 12) clearInterval(_iv);
+            }, 500);
         }
 
         const modal = document.getElementById('q-modal-ia');
