@@ -893,24 +893,16 @@
         }
 
 
-        // Stop propagation em todos os eventos que a galeria possa estar ouvindo
-        ['pointerdown','mousedown','touchstart','click'].forEach(ev => {
-            openBtn.addEventListener(ev, (e) => {
-                e.stopPropagation();
-                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-                if (ev === 'click') e.preventDefault();
-            }, true);
-        });
-        openBtn.onclick = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+        // Botão está em position:fixed no body (fora da galeria), então click NÃO vaza pro lightbox.
+        // stopPropagation é defensivo (caso algum listener global escute clicks no body).
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const prodName = document.querySelector('h1.product__title,.product-single__title,h1')?.innerText || document.title;
             applyProduct(detectProduct(prodName));
             populateImageSelector();
             openModal();
-        };
+        });
 
 
         closeBtn.onclick = () => closeModal();
