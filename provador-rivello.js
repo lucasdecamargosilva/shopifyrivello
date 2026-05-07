@@ -890,6 +890,14 @@
         }
 
 
+        // Stop propagation em todos os eventos que a galeria possa estar ouvindo
+        ['pointerdown','mousedown','touchstart','click'].forEach(ev => {
+            openBtn.addEventListener(ev, (e) => {
+                e.stopPropagation();
+                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                if (ev === 'click') e.preventDefault();
+            }, true);
+        });
         openBtn.onclick = (e) => {
             if (e) {
                 e.preventDefault();
