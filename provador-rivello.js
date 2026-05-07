@@ -504,7 +504,7 @@
             flex-shrink: 0; border-top: 1px solid var(--c-line); text-decoration: none;
         }
         .q-powered-footer span { font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--c-muted); }
-        .q-powered-footer img, .q-quantic-logo { height: 20px !important; width: auto !important; max-height: 20px !important; max-width: 90px !important; opacity: 0.7; }
+        .q-powered-footer img, .q-quantic-logo { height: 20px !important; width: auto !important; max-height: 20px !important; max-width: none !important; min-width: 0 !important; object-fit: contain !important; opacity: 0.7; }
     `;
 
 
@@ -674,48 +674,51 @@
         openBtn.innerHTML = stampImageHTML;
 
 
-        const imgContainers = ['.js-product-slide', '.product-image-column', '.js-swiper-product', '[data-store^="product-image-"]', '.product__media-wrapper', '.product-gallery__media', '.product__media', '.product-image-main', '.product-media-container', '[data-media-id]', '.product__media-item', '.product-gallery', '.product-single__media', '.media-gallery'];
+        const imgContainers = ['.media-gallery', '.product-media-container', '.product__media-wrapper', '.product-gallery__media', '.product__media', '.product-image-main', '.product__media-item', '.product-gallery', '.product-single__media', '[data-media-id]', '.js-product-slide', '.product-image-column', '.js-swiper-product', '[data-store^="product-image-"]'];
 
-        function tryPlaceTriggerBtn() {
-            // 1ª prioridade: container que tenha <img> dentro (evita cair em slide de vídeo)
+        // Anexa no body com position:fixed pra impedir que clicks vazem pra galeria (lightbox).
+        // Posiciona dinamicamente sobre o canto superior direito da imagem do produto.
+        openBtn.style.cssText = 'position:fixed !important;z-index:99999 !important;width:70px;height:70px;';
+        document.body.appendChild(openBtn);
+
+        function findTargetImage() {
             for (const sel of imgContainers) {
                 const els = document.querySelectorAll(sel);
                 for (const el of els) {
-                    if (el.querySelector('img')) {
-                        if (window.getComputedStyle(el).position === 'static') el.style.position = 'relative';
-                        el.appendChild(openBtn);
-                        return true;
+                    const rect = el.getBoundingClientRect();
+                    if (rect.width > 100 && rect.height > 100 && el.querySelector('img')) {
+                        return el;
                     }
                 }
             }
-            // 2ª prioridade: qualquer container correspondente
-            for (const sel of imgContainers) {
-                const el = document.querySelector(sel);
-                if (el) {
-                    if (window.getComputedStyle(el).position === 'static') el.style.position = 'relative';
-                    el.appendChild(openBtn);
-                    return true;
-                }
+            return null;
+        }
+
+        function repositionTrigger() {
+            const target = findTargetImage();
+            if (!target) {
+                openBtn.style.display = 'none';
+                return;
             }
-            return false;
+            const rect = target.getBoundingClientRect();
+            // Esconde se a imagem está fora da viewport
+            if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                openBtn.style.display = 'none';
+                return;
+            }
+            openBtn.style.display = 'flex';
+            openBtn.style.top = (rect.top + 14) + 'px';
+            openBtn.style.left = (rect.right - 70 - 14) + 'px';
         }
 
-        if (!tryPlaceTriggerBtn()) {
-            // Container não pronto ainda (ex: após F5 no mobile).
-            // Observa DOM até 5s aguardando o container aparecer.
-            const observer = new MutationObserver(() => {
-                if (tryPlaceTriggerBtn()) observer.disconnect();
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
+        repositionTrigger();
+        window.addEventListener('scroll', repositionTrigger, { passive: true });
+        window.addEventListener('resize', repositionTrigger);
 
-            setTimeout(() => {
-                observer.disconnect();
-                if (!openBtn.isConnected) {
-                    openBtn.style.cssText = 'position:fixed;bottom:30px;right:20px;top:auto;z-index:100;';
-                    document.body.appendChild(openBtn);
-                }
-            }, 5000);
-        }
+        // Observa DOM por mudanças (caso a imagem só apareça depois)
+        const _trigObs = new MutationObserver(() => repositionTrigger());
+        _trigObs.observe(document.body, { childList: true, subtree: true });
+        setTimeout(() => _trigObs.disconnect(), 8000);
 
 
         const modal = document.getElementById('q-modal-ia');
