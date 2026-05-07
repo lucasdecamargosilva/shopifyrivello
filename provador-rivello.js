@@ -300,13 +300,13 @@
         openBtn.setAttribute('aria-label', 'Abrir Provador Virtual');
         openBtn.insertAdjacentHTML('afterbegin', stampImageHTML);
 
-        // Coloca o selo dentro do product-gallery (container estavel que nao re-renderiza)
-        const gallery = document.querySelector('product-gallery') || document.querySelector('.product-gallery');
+        // Coloca o selo dentro do container da galeria (container estavel que nao re-renderiza)
+        const gallery = document.querySelector('product-gallery, .product-gallery, .media-gallery, .product-media-container');
         if (gallery) {
             if (window.getComputedStyle(gallery).position === 'static') gallery.style.position = 'relative';
             gallery.appendChild(openBtn);
         } else {
-            openBtn.style.cssText = 'position:fixed;bottom:100px;right:15px;z-index:9999;width:70px;height:70px;';
+            openBtn.style.cssText = 'position:fixed;top:auto;bottom:100px;right:15px;left:auto;z-index:9999;width:70px;height:70px;';
             document.body.appendChild(openBtn);
         }
 
