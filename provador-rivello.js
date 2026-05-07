@@ -1,26 +1,10 @@
 (function () {
-    const apiKey = "pl_live_156c5985bf6dbfa6929007420af9a9792d72d11ad239533663d0255a6a7ecd96";
+    const apiKey = "pl_live_3606e5d4c2209dd70c37dbacd69f495c96cb1cc701f6c6b035c59d3241883016";
     window.PROVOU_LEVOU_API_KEY = apiKey;
 
-    const WEBHOOK_CALCADOS = 'https://n8n.segredosdodrop.com/webhook/quantic-materialize-carminito';
-    const WEBHOOK_SUETER = 'https://n8n.segredosdodrop.com/webhook/quantic-materialize';
-
-    function detectWebhook() {
-        // Detecta categoria via Shopify product JSON, breadcrumb ou URL
-        const productJson = document.querySelector('script[type="application/json"][data-product-json]');
-        let productType = '';
-        if (productJson) {
-            try { productType = JSON.parse(productJson.textContent).type || ''; } catch(_) {}
-        }
-        // Fallback: checa breadcrumb e meta tags
-        const breadcrumb = document.querySelector('.breadcrumb, .breadcrumbs, nav[aria-label="breadcrumb"]')?.textContent || '';
-        const pageText = (productType + ' ' + breadcrumb + ' ' + document.title + ' ' + (document.querySelector('meta[property="og:type"]')?.content || '')).toLowerCase();
-
-        if (/su[eé]ter|sweater|sueteres|moletom/.test(pageText)) return WEBHOOK_SUETER;
-        // Shopify coloca o tipo do produto no meta ou no JSON — checa collection na URL tambem
-        if (window.location.href.toLowerCase().includes('sueteres') || window.location.href.toLowerCase().includes('sweater')) return WEBHOOK_SUETER;
-        return WEBHOOK_CALCADOS;
-    }
+    // Rivello = roupas. Usa o workflow quantic-materialize (Vertex AI virtual-try-on).
+    const WEBHOOK_PROVA = 'https://n8n.segredosdodrop.com/webhook/quantic-materialize';
+    function detectWebhook() { return WEBHOOK_PROVA; }
 
 
     // ─── LOCK / UNLOCK SCROLL ────────────────────────────────────────────────────
@@ -204,7 +188,7 @@
                     <div id="q-header-provador">
                         <h1 style="margin:0 0 6px 0;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Provador Virtual</h1>
                         <div style="margin:0;text-align:center;">
-                            <img src="https://carminito.com/cdn/shop/files/C_A_R_M_I_N_I_T_O_8485d63c-f949-4d30-800d-0b2a7f67e871.png?v=1774712404&width=280" alt="CARMINITO" style="height:24px;width:auto;display:inline-block;">
+                            <img src="https://userivello.com/cdn/shop/files/LogoSite-Branco_40192369-a3d2-4e9f-bc88-f30c2f0bb161.png?height=106&v=1764198781" alt="Rivello" style="height:24px;width:auto;display:inline-block;filter:brightness(0);">
                         </div>
                     </div>
                     <div id="q-step-upload">
