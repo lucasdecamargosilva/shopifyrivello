@@ -1102,7 +1102,7 @@
                 const resp = await fetch(WEBHOOK_PIX, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'cliente@provoulevou.com.br', phone: '55' + phoneInput.value.replace(/\D/g, '') })
+                    body: JSON.stringify({ email: 'cliente@provoulevou.com.br', phone: '55' + phoneInput.value.replace(/\D/g, ''), loja: 'rivello', origin: location.origin })
                 });
                 const pix = await resp.json();
                 if (!pix.payment_id || !pix.qr_code) throw new Error('PIX inválido');
