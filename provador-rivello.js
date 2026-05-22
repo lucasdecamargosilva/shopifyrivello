@@ -574,7 +574,7 @@
                             <span>Concordo com os <a href="http://provoulevou.com.br/termos.html" target="_blank">Termos e Condi&#231;&#245;es</a></span>
                         </label>
 
-                        <button class="q-btn-black" id="q-btn-generate" disabled>Provar pe&#231;a</button>
+                        <button class="q-btn-black" id="q-btn-generate">Provar pe&#231;a</button>
                     </div>
 
                     <!-- PIX -->
