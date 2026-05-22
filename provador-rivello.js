@@ -1136,7 +1136,7 @@
             try {
                 let pix;
 
-                const _ppPhone = '55' + phoneInput.value.replace(/\D/g;
+                const _ppPhone = '55' + phoneInput.value.replace(/\D/g, '');
 
                 const pending = _pixLoadPending(_ppPhone);
 
